@@ -368,9 +368,22 @@ public class InitialHandler extends PacketHandler implements PendingConnection
                         {
                             if ( UUID == null )
                             {
-                                UUID = java.util.UUID.nameUUIDFromBytes( ( "OfflinePlayer:" + getName() ).getBytes( Charsets.UTF_8 ) ).toString();
+                                UUID = java.util.UUID.nameUUIDFromBytes( ( "OfflinePlayer:" + getName() ).getBytes( Charsets.UTF_8 ) ).toString().replaceAll( "\\-", "" );
                             }
-                            unsafe.sendPacket( new LoginSuccess( UUID, getName() ) );
+                            if ( getVersion() == 5 )
+                            {
+                                unsafe.sendPacket( new LoginSuccess(
+                                        UUID.substring( 0, 8 ) + "-" +
+                                                UUID.substring( 8, 12 ) + "-" +
+                                                UUID.substring( 12, 16 ) + "-" +
+                                                UUID.substring( 16, 20 ) + "-" +
+                                                UUID.substring( 20, 32 )
+                                        , getName()
+                                ) );
+                            } else
+                            {
+                                unsafe.sendPacket( new LoginSuccess( UUID, getName() ) );
+                            }
                             ch.setProtocol( Protocol.GAME );
 
                             UserConnection userCon = new UserConnection( bungee, ch, getName(), InitialHandler.this );
